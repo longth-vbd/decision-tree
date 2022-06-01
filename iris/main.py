@@ -3,14 +3,16 @@ import matplotlib.pyplot as plt
 from sklearn.tree import plot_tree
 import graphviz
 import load_data
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score, cross_validate
+from sklearn import metrics
 
 class IRIS_CLASSIFIER(object):
-    def __init__(self, feature_names, feature_num, test_size):
+    def __init__(self, feature_names, feature_num, test_size, fold_num):
         self.decision_tree_classifier = tree.DecisionTreeClassifier()
         self.features = feature_names
         self.feature_num = feature_num
         self.test_size = test_size
+        self.fold_num = fold_num
 
     def load_data(self, data_path):
         iris = load_data.manually_load_data(data_path, self.feature_num)
@@ -67,16 +69,29 @@ class IRIS_CLASSIFIER(object):
         # print(graph)
         graph.render("iris")
 
+    def scoring(self, test_label, test_preds):
+        print("accuracy = ", metrics.accuracy_score(test_label, test_preds))
+        print("micro precision = ", metrics.precision_score(test_label, test_preds, average='micro'))
+        print("macro precision = ", metrics.precision_score(test_label, test_preds, average='macro'))
+        print("weighted precision = ", metrics.precision_score(test_label, test_preds, average='weighted'))
+        print("micro recall = ", metrics.recall_score(test_label, test_preds, average='micro'))
+        print("micro f1 = ", metrics.f1_score(test_label, test_preds, average='micro'))
+        print("micro beta 0.5 = ", metrics.fbeta_score(test_label, test_preds, beta=0.5, average='micro'))
+        print("micro beta 1 = ", metrics.fbeta_score(test_label, test_preds, beta=1, average='micro'))
+        print("micro beta 2 = ", metrics.fbeta_score(test_label, test_preds, beta=2, average='micro'))
+        return
+
 
 def main():
     # features
     feature_num = 4
     feature_names = ['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)']
-    test_size = 0.4
+    test_size = 0.8
+    fold_num = 3
 
     # 1. init
-    iris_tree = IRIS_CLASSIFIER(feature_names, feature_num, test_size)
-    # model = iris_tree.decision_tree_classifier
+    iris_tree = IRIS_CLASSIFIER(feature_names, feature_num, test_size, fold_num)
+    tree_model = iris_tree.decision_tree_classifier
 
     # 2. manually load data
     data_path = "../data/iris.data"
@@ -95,8 +110,23 @@ def main():
     # training
     train_input, train_label, test_input, test_label = iris_tree.split_data()
     trained_model = iris_tree.classifier(train_input, train_label)
+    
+    # scoring
     scores = trained_model.score(test_input, test_label)
-    print(scores)
+    print("test scores = ", scores)
+    
+    # predict
+    test_preds = trained_model.predict(test_input)
+    print(test_preds)
+    print(test_label)
+
+    # metrics
+    iris_tree.scoring(test_label, test_preds)
+
+    # cross validation
+    # cross_scores = cross_val_score(tree_model, inputs, targets, cv=iris_tree.fold_num)
+    cross_scores = cross_validate(tree_model, inputs, targets, cv=iris_tree.fold_num, scoring='precision_macro')
+    print(cross_scores)
 
     # 4. plot
     # iris_tree.plotting_tree(outputs)

@@ -3,6 +3,7 @@ from sklearn import tree
 import matplotlib.pyplot as plt
 from sklearn.tree import plot_tree
 import graphviz
+import numpy as np
 
 class IRIS_CLASSIFIER(object):
     def __init__(self):
@@ -68,6 +69,7 @@ def main():
     iris_tree.load_data()
     inputs = iris_tree.inputs
     targets = iris_tree.targets
+    np.unique(targets)
 
     # samples
     iris_tree.get_samples()
