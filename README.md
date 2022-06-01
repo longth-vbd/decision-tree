@@ -23,3 +23,10 @@ conda install python-graphviz
 ```bash
 python iris/sklearn_iris.py
 ```
+
+2. Run manually
+- Download [iris data](https://archive.ics.uci.edu/ml/datasets/iris)
+```bash
+sh iris/load-data.sh
+python iris/main.py
+```
